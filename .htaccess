@@ -1,0 +1,168 @@
+//Serve All Requests With One PHP File with .htaccess
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([^?]*)$ /index.php [NC,L,QSA]
+
+//WordPress .htaccess for permalinks with .htaccess
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+ RewriteEngine On
+ RewriteBase /
+ RewriteCond %{REQUEST_FILENAME} !-f
+ RewriteCond %{REQUEST_FILENAME} !-d
+ RewriteRule . /index.php [L]
+</IfModule>
+# END WordPress
+
+//Force www with .htaccess
+RewriteEngine on
+RewriteCond %{HTTP_HOST} ^example\.com [NC]
+RewriteRule ^(.*)$ https://www.example.com/$1 [L,R=301,NC]
+
+//Force www in a Generic Way with .htaccess
+RewriteCond %{HTTP_HOST} !^$
+RewriteCond %{HTTP_HOST} !^www\. [NC]
+RewriteCond %{HTTPS}s ^on(s)|
+RewriteRule ^ http%1://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+//Force non-www with .htaccess
+RewriteEngine on
+RewriteCond %{HTTP_HOST} ^www\.example\.com [NC]
+RewriteRule ^(.*)$ https://example.com/$1 [L,R=301]
+
+//Force non-www in a Generic Way with .htaccess
+RewriteEngine on
+RewriteCond %{HTTP_HOST} ^www\.
+RewriteCond %{HTTPS}s ^on(s)|off
+RewriteCond http%1://%{HTTP_HOST} ^(https?://)(www\.)?(.+)$
+RewriteRule ^ %1%3%{REQUEST_URI} [R=301,L]
+
+//Force HTTPS with .htaccess
+RewriteEngine on
+RewriteCond %{HTTPS} !on
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+
+//Force HTTPS Behind a Proxy with .htaccess
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+
+//Force Trailing Slash with .htaccess
+RewriteCond %{REQUEST_URI} /+[^\.]+$
+RewriteRule ^(.+[^/])$ %{REQUEST_URI}/ [R=301,L]
+
+//Remove Trailing Slash with .htaccess
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)/$ /$1 [R=301,L]
+
+//Redirect a Single Page with .htaccess
+Redirect 301 /oldpage.html https://www.yoursite.com/newpage.html
+Redirect 301 /oldpage2.html https://www.yoursite.com/folder/
+
+//Alias a Single Directory with .htaccess
+RewriteEngine On
+RewriteRule ^source-directory/(.*) target-directory/$1
+
+//Redirect an Entire Site with .htaccess
+Redirect 301 / https://newsite.com/
+
+//Deny All Access with .htaccess
+Deny from all
+
+//Deny All Access Except Yours (Only allow certain IPs) with .htaccess
+Order deny,allow
+Deny from all
+Allow from xxx.xxx.xxx.xxx
+
+//Deny Access to Backup and Source Files with .htaccess
+<FilesMatch "(\.(bak|config|dist|fla|inc|ini|log|psd|sh|sql|swp)|~)$">
+    ## Apache 2.2
+    Order allow,deny
+    Deny from all
+    Satisfy All
+
+    ## Apache 2.4
+    # Require all denied
+</FilesMatch>
+
+//Disable Directory Browsing with .htaccess
+Options All -Indexes
+
+//Enable Directory Listings with .htaccess
+Options All +Indexes
+
+//Disable Listing Of Certain Filetypes (if Indexes is not disabled) with .htaccess
+IndexIgnore *.zip *.mp4 *.pdf
+
+//Disable Image Hotlinking with .htaccess
+RewriteEngine on
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^http(s)?://(www\.)?yourdomain.com [NC]
+RewriteRule \.(jpg|jpeg|png|gif)$ - [NC,F,L]
+
+//Redirect hotlinkers and show a different image with .htaccess
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^https://(www\.)?your-website.com/.*$ [NC]
+RewriteRule \.(gif|jpg|png)$ https://www.your-website.com/do-not-hotlink-our-content.jpg [R,L]
+
+//Compress Text Files (gzip/deflate output) with .htaccess
+<IfModule mod_deflate.c>
+
+        # Force compression for mangled headers.
+        # https://developer.yahoo.com/blogs/ydn/posts/2010/12/pushing-beyond-gzipping
+        <IfModule mod_setenvif.c>
+                <IfModule mod_headers.c>
+                        SetEnvIfNoCase ^(Accept-EncodXng|X-cept-Encoding|X{15}|~{15}|-{15})$ ^((gzip|deflate)\s*,?\s*)+|[X~-]{4,13}$ HAVE_Accept-Encoding
+                        RequestHeader append Accept-Encoding "gzip,deflate" env=HAVE_Accept-Encoding
+                </IfModule>
+        </IfModule>
+
+        # Compress all output labeled with one of the following MIME-types
+        # (for Apache versions below 2.3.7, you don't need to enable `mod_filter`
+        #    and can remove the `<IfModule mod_filter.c>` and `</IfModule>` lines
+        #    as `AddOutputFilterByType` is still in the core directives).
+        <IfModule mod_filter.c>
+            AddOutputFilterByType DEFLATE application/atom+xml \
+              application/javascript \
+              application/json \
+              application/rss+xml \
+              application/vnd.ms-fontobject \
+              application/x-font-ttf \
+              application/x-web-app-manifest+json \
+              application/xhtml+xml \
+              application/xml \
+              font/opentype \
+              image/svg+xml \
+              image/x-icon \
+              text/css \
+              text/html \
+              text/plain \
+              text/x-component \
+              text/xml
+        </IfModule>
+
+</IfModule>
+
+//Limit Upload File Size with .htaccess
+LimitRequestBody 1048576
+
+//Custom Error Pages with .htaccess
+ErrorDocument 500 "Houston, we have a problem."
+ErrorDocument 401 https://error.yourdomain.com/mordor.html
+ErrorDocument 404 /errors/halflife3.html
+
+//Redirect users to a maintenance page while you update with .htaccess
+ErrorDocument 403 YourMaintenancePageFilenameOrFullUrlUrl.html
+Order deny,allow
+Deny from all
+Allow from 555.555.555.555
+
+//Force Downloading with .htaccess
+<Files *.md>
+        ForceType application/octet-stream
+        Header set Content-Disposition attachment
+</Files>
+
+//Execute PHP with a different file extension with .htaccess
+AddType application/x-httpd-php .ext
+
+
